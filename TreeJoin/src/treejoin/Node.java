@@ -47,20 +47,21 @@ public class Node<T> {
         this.right = right;
     }
     
-    public void print() {
-        print("", this, false);
-    }
-
-    private void print(String prefix, Node node, boolean isLeft) {
-        if (node != null) {
-            System.out.println(prefix + (isLeft ? "|-- " : "\\-- ") + node.value);
-            print(prefix + (isLeft ? "|   " : "    "), node.left, true);
-            print(prefix + (isLeft ? "|   " : "    "), node.right, false);
-        }
-    }
-
     @Override
     public String toString() {
-        return "Node{" + "value=" + value + ", left=" + left + ", right=" + right + '}';
+        return this.toString(new StringBuilder(), true, new StringBuilder()).toString();
+    }
+    
+    private StringBuilder toString(StringBuilder prefix, boolean isTail, StringBuilder stringBuilder) {
+        if(getRight() != null) {
+            getRight().toString(new StringBuilder().append(prefix).append(isTail ? "│   " : "    "), false, stringBuilder);
+        }
+        stringBuilder.append(prefix).append(isTail ? "└── " : "┌── ").append(getValue().toString()).append("\n");
+        
+        if(getLeft() != null) {
+            getLeft().toString(new StringBuilder().append(prefix).append(isTail ? "    " : "│   "), true, stringBuilder);
+        }
+        
+        return stringBuilder;
     }
 }

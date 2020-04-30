@@ -6,6 +6,8 @@
 
 package treejoin;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Alfredo Maldonado
@@ -14,20 +16,20 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     
     private static final int MAX_LEVEL = 5;
     
-    private Node<T> node;
+    private Node<T> root;
 
     public BinaryTree() {
-        this.node = null;
+        this.root = null;
     }
     
     @Override
     public void insert(T value) {
         if (this.isEmpty()) {
-            this.node = new Node(value);
+            this.root = new Node(value);
         } else {
             Node nodeFound = findNode(value);
             if (nodeFound == null) {
-                insert(this.node, value);
+                insert(this.root, value);
             }
         }
     }
@@ -49,7 +51,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     }
     
     public void insertTree(T value, BinaryTree<T> tree) throws Exception {
-        this.validateLevel(tree);
+        this.validateLevel(tree, value);
         
         Node nodeFound = findNode(value);
         
@@ -57,18 +59,46 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
             throw new Exception("The value does not exit in the tree");
         }
         
-        if (value.compareTo(tree.node.getValue()) > 0) {
+        if (value.compareTo(tree.root.getValue()) > 0) {
             if (nodeFound.getLeft() != null) {
                 throw new Exception("It can not insert, it already have a child left node.");
             }
             
-            nodeFound.setLeft(tree.node);
+            nodeFound.setLeft(tree.root);
         } else {
             if (nodeFound.getRight() != null) {
                 throw new Exception("It can not insert, it already have a child right node.");
             }
-            nodeFound.setRight(tree.node);
+            nodeFound.setRight(tree.root);
         }
+    }
+    
+    public Node<T> removeNode (T value) {
+        return removeNode(this.root, value);
+    }
+    
+    private Node<T> removeNode(Node<T> node, T value) {
+        if (node == null) {
+            return node;
+        }
+        
+        if (value.compareTo(node.getValue()) < 0) {
+            node.setLeft(removeNode(node.getLeft(), value));
+        } else if (value.compareTo(node.getValue()) > 0) {
+            node.setRight(removeNode(node.getRight(), value));
+        } else {
+            if (node.getLeft() == null) {
+                return node.getRight();
+            } else if (node.getRight() == null){
+                return node.getLeft();
+            }
+            
+            Node<T> auxiliar = findMinValue(node.getRight());
+            node.setValue(auxiliar.getValue());
+            node.setRight(removeNode(node.getRight(), node.getValue()));
+        }
+
+        return node;
     }
     
     @Override
@@ -76,7 +106,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         if (this.isEmpty()) {
             return 0;
         } else {
-            return getLevel(this.node);
+            return getLevel(this.root);
         }
     }
     
@@ -92,8 +122,27 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         return result + 1;
     }
     
-    public Node<T> findNode(T value) {
-        return findNode(this.node, value);
+    private int getLevelByNode(Node<T> node, T data, int level)  
+    { 
+        if (node == null)
+            return 0;
+   
+        if (node.getValue().equals(data)) {
+            return level;
+        }
+   
+        int resultLevel = getLevelByNode(node.getLeft(), data, level + 1);
+        
+        if (resultLevel != 0)
+            return resultLevel;
+   
+        resultLevel = getLevelByNode(node.getRight(), data, level + 1);
+        
+        return resultLevel; 
+    } 
+    
+    private Node<T> findNode(T value) {
+        return findNode(this.root, value);
     }
     
     public Node<T> findNode(Node<T> node, T value) {
@@ -114,8 +163,60 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         }
     }
     
-    private void validateLevel(BinaryTree<T> tree) throws Exception {
-        int totalLevel = this.getLevel() + tree.getLevel();
+    public void balanceTree() {
+        balanceTree(this.root);
+    }
+    
+    private void balanceTree(Node<T> node)
+    {
+        ArrayList<Node<T>> nodes = new ArrayList<>();
+        saveNodes(node, nodes);
+        this.root = null;
+        int size = nodes.size();
+        
+        balanceTreebyMiddleNode(nodes, 0, size - 1);
+    }
+    
+    private Node balanceTreebyMiddleNode(ArrayList<Node<T>> nodes, int start, int end)
+    {
+        if (start > end) {
+            return null;
+        }
+        
+        int middle = (start + end) / 2;
+        Node<T> middleNode = nodes.get(middle);
+        this.insert(middleNode.getValue());
+        middleNode.setLeft(balanceTreebyMiddleNode(nodes, start, middle - 1));
+        middleNode.setRight(balanceTreebyMiddleNode(nodes, middle + 1, end));
+        
+        return middleNode;
+    } 
+    
+    private void saveNodes(Node root, ArrayList<Node<T>> nodes)
+    {
+        if (root == null) {
+            return;
+        }
+        
+        saveNodes(root.getLeft(), nodes);
+        nodes.add(root);
+        saveNodes(root.getRight(), nodes);
+    }
+    
+    private Node<T> findMinValue(Node<T> node) 
+    { 
+        Node minv = node;
+        while (node.getLeft() != null) 
+        { 
+            minv = node.getLeft();
+            node = node.getLeft();
+        } 
+        
+        return minv; 
+    } 
+    
+    private void validateLevel(BinaryTree<T> tree, T value) throws Exception {
+        int totalLevel = this.getLevelByNode(this.root, value, 1) + tree.getLevel();
         
         if (totalLevel > MAX_LEVEL) {
             throw new Exception("Invalid operation because the level is greather than 5.");
@@ -124,10 +225,11 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     
     @Override
     public boolean isEmpty() {
-        return node == null;
+        return root == null;
     }
     
-    public void print() {
-        this.node.print();
+    @Override
+    public String toString() {
+        return this.root.toString();
     }
 }
