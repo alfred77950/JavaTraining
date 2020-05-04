@@ -16,7 +16,7 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
     
     private static final int MAX_LEVEL = 5;
     
-    private Node<T> root;
+    public Node<T> root;
 
     public BinaryTree() {
         this.root = null;
@@ -141,11 +141,11 @@ public class BinaryTree<T extends Comparable<T>> implements Tree<T> {
         return resultLevel; 
     } 
     
-    private Node<T> findNode(T value) {
+    public Node<T> findNode(T value) {
         return findNode(this.root, value);
     }
     
-    public Node<T> findNode(Node<T> node, T value) {
+    private Node<T> findNode(Node<T> node, T value) {
         if (node == null) {
             return null;
         }
