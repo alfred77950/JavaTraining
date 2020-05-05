@@ -1,0 +1,32 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : May 5, 2020, 12:23:48 PM
+    Author     : ASUS
+*/
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 15px;
+}
+
+.container .form-student {
+    width: 500px;
+    margin: auto;
+}
+
+.container .access-button {
+    display: flex;
+    margin: 5px 0px;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.container .access-button .form-search {
+    margin-left: 5px;
+}
